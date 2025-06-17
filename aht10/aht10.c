@@ -7,9 +7,7 @@
 #define AHT10_STATUS_CAL       (1 << 3)
 
 #define AHT10_MEASURE_WAIT     PICORTOS_DELAY_MSEC(80l)
-#define AHT10_MEASURE_RESP_LEN (1 + 5)
-
-#define CALIBRATION_IS_AVAILABLE
+#define AHT10_MEASURE_RESP_LEN (1 + 5) /* status + data */
 
 int aht10_init(struct aht10 *ctx, struct twi *i2c, twi_addr_t addr)
 {
@@ -47,9 +45,6 @@ static int aht10_read_measure_resp(struct aht10 *ctx, struct aht10_measurement *
         m->temperature = (int)((((unsigned long)(buf[3] & 0xf) << 16 |
                                  (unsigned long)buf[4] << 8 |
                                  (unsigned long)buf[5]) * 200ul) >> 20) - 50;
-
-        m->temperature = (int)buf[0];
-
         /* done */
         ctx->state = AHT10_STATE_SETUP;
         return (int)sizeof(*m);
@@ -58,7 +53,6 @@ static int aht10_read_measure_resp(struct aht10 *ctx, struct aht10_measurement *
     return -EAGAIN;
 }
 
-#ifdef CALIBRATION_IS_AVAILABLE
 static int aht10_calibration(struct aht10 *ctx)
 {
     int res;
@@ -75,7 +69,6 @@ static int aht10_calibration(struct aht10 *ctx)
 
     return -EAGAIN;
 }
-#endif
 
 static int aht10_read_measure_status(struct aht10 *ctx, struct aht10_measurement *m)
 {
@@ -85,14 +78,12 @@ static int aht10_read_measure_status(struct aht10 *ctx, struct aht10_measurement
     if ((res = twi_read(ctx->i2c, &status, sizeof(status), TWI_F_START | TWI_F_STOP)) < 0)
         return res;
 
-#ifdef CALIBRATION_IS_AVAILABLE
     if ((status & AHT10_STATUS_CAL) == 0) {
         /* calibration */
         ctx->len = sizeof(AHT10_INIT_REQ) - 1;
         ctx->state = AHT10_STATE_CALIBRATION;
         return aht10_calibration(ctx);
     }
-#endif
 
     if ((status & AHT10_STATUS_BUSY) == 0) {
         /* response is ready */
@@ -164,9 +155,7 @@ int aht10_read(struct aht10 *ctx, struct aht10_measurement *m)
     case AHT10_STATE_MEASURE_REQ: return aht10_read_measure_req(ctx, m);
     case AHT10_STATE_MEASURE_WAIT: return aht10_read_measure_wait(ctx, m);
     case AHT10_STATE_MEASURE_STATUS: return aht10_read_measure_status(ctx, m);
-#ifdef CALIBRATION_IS_AVAILABLE
     case AHT10_STATE_CALIBRATION: return aht10_calibration(ctx);
-#endif
     case AHT10_STATE_MEASURE_RESP: return aht10_read_measure_resp(ctx, m);
     default: break;
     }
