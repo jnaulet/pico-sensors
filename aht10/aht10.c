@@ -73,19 +73,19 @@ static int aht10_calibration(struct aht10 *ctx)
 static int aht10_read_measure_status(struct aht10 *ctx, struct aht10_measurement *m)
 {
     int res;
-    char status = 0;
+    char status = (char)0;
 
     if ((res = twi_read(ctx->i2c, &status, sizeof(status), TWI_F_START | TWI_F_STOP)) < 0)
         return res;
 
-    if ((status & AHT10_STATUS_CAL) == 0) {
+    if (((int)status & AHT10_STATUS_CAL) == 0) {
         /* calibration */
         ctx->len = sizeof(AHT10_INIT_REQ) - 1;
         ctx->state = AHT10_STATE_CALIBRATION;
         return aht10_calibration(ctx);
     }
 
-    if ((status & AHT10_STATUS_BUSY) == 0) {
+    if (((int)status & AHT10_STATUS_BUSY) == 0) {
         /* response is ready */
         ctx->len = (size_t)AHT10_MEASURE_RESP_LEN;
         ctx->state = AHT10_STATE_MEASURE_RESP;
