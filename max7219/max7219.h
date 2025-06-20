@@ -31,7 +31,6 @@ typedef enum {
 struct max7219 {
     /*@temp@*/ struct spi *spi;
     max7219_state_t state;
-    size_t packet_size;
     size_t len;
 };
 

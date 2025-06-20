@@ -7,7 +7,7 @@ int max7219_init(struct max7219 *ctx, struct spi *spi)
 {
     ctx->spi = spi;
     ctx->state = MAX7219_STATE_SETUP;
-    ctx->packet_size = sizeof(uint16_t);
+    ctx->len = 0;
 
     return 0;
 }
