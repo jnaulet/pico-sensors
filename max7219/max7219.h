@@ -22,8 +22,17 @@ typedef enum {
     MAX7219_ADDR_COUNT
 } max7219_addr_t;
 
+typedef enum {
+    MAX7219_STATE_SETUP,
+    MAX7219_STATE_XFER,
+    MAX7219_STATE_COUNT
+} max7219_state_t;
+
 struct max7219 {
     /*@temp@*/ struct spi *spi;
+    max7219_state_t state;
+    size_t packet_size;
+    size_t len;
 };
 
 int max7219_init(/*@out@*/ struct max7219 *ctx, struct spi *spi);
