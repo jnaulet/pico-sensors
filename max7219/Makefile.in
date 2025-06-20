@@ -1,0 +1,10 @@
+#
+# picoRTOS sensors library
+#
+# How tu use:
+# -include /path/to/pico-sensors/sensor/Makefile.in
+#
+max7219-path := $(dir $(lastword $(MAKEFILE_LIST)))
+
+c_src-y   += $(max7219-path)max7219.c
+include-y += -I$(max7219-path)
