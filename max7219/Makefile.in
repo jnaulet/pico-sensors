@@ -4,7 +4,7 @@
 # How tu use:
 # -include /path/to/pico-sensors/sensor/Makefile.in
 #
-aht10-path := $(dir $(lastword $(MAKEFILE_LIST)))
+max7219-path := $(dir $(lastword $(MAKEFILE_LIST)))
 
-c_src-y   += $(aht10-path)aht10.c
-include-y += -I$(aht10-path)
+c_src-y   += $(max7219-path)max7219.c
+include-y += -I$(max7219-path)
