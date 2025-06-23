@@ -3,9 +3,10 @@
 #include <picoRTOS.h>
 #include <errno.h>
 
-int max7219_init(struct max7219 *ctx, struct spi *spi)
+int max7219_init(struct max7219 *ctx, struct spi *spi, struct gpio *load)
 {
     ctx->spi = spi;
+    ctx->load = load;
     ctx->state = MAX7219_STATE_SETUP;
     ctx->len = 0;
 
@@ -21,6 +22,7 @@ static int send_xfer(struct max7219 *ctx, max7219_addr_t addr, uint8_t data)
 {
     int res;
     size_t index = sizeof(uint16_t) - ctx->len;
+    /* probably not worth the trouble of computing once */
     uint8_t packet[2] = { (uint8_t)addr, data };
 
     if ((res = spi_xfer(ctx->spi, &packet[index], &packet[index], ctx->len)) < 0)
@@ -62,8 +64,12 @@ int max7219_send(struct max7219 *ctx, max7219_addr_t addr, uint8_t data)
 {
     picoRTOS_assert(addr < MAX7219_ADDR_COUNT, return -EINVAL);
 
-    uint16_t packet = (uint16_t)addr << 8 | data;
+    switch(ctx->state){
+    case MAX7219_STATE_SETUP: return send_setup(ctx, addr, data);
+    case MAX7219_STATE_XFER: return send_xfer(ctx, addr, data);
+    defaut: break;
+    }
 
-    spi_write(ctx->spi, &packet, sizeof(packet) - n);
-
+    picoRTOS_break();
+    /*@notreached@*/ return -EIO;
 }
