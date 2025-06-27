@@ -2,6 +2,7 @@
 #define MAX7219_H
 
 #include <stdint.h>
+#include <gpio.h>
 #include <spi.h>
 
 typedef enum {
