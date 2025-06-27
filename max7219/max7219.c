@@ -18,28 +18,41 @@ void max7219_release(struct max7219 *ctx)
     /*@i@*/ (void)ctx;
 }
 
-static int send_xfer(struct max7219 *ctx, max7219_addr_t addr, uint8_t data)
+static int send_xfer(struct max7219 *ctx, max7219_addr_t addr, const uint8_t *data, size_t n)
 {
-    int res;
-    size_t index = sizeof(uint16_t) - ctx->len;
-    /* probably not worth the trouble of computing once */
-    uint8_t packet[2] = { (uint8_t)addr, data };
+    picoRTOS_assert(addr < MAX7219_ADDR_COUNT, return -EINVAL);
+    picoRTOS_assert(n > 0, return -EINVAL);
 
-    if ((res = spi_xfer(ctx->spi, &packet[index], &packet[index], ctx->len)) < 0)
-        return res;
+    int xfered = 0;
 
-    if ((ctx->len -= (size_t)res) == 0) {
-        ctx->state = MAX7219_STATE_SETUP;
-        return (int)sizeof(uint16_t);
+    while (xfered < (int)n) {
+
+        int res;
+        int len = (int)sizeof(uint16_t) - ctx->pos;
+        /* probably not worth the trouble of computing once */
+        uint8_t packet[2] = { (uint8_t)addr, data[xfered] };
+
+        if ((res = spi_xfer(ctx->spi, &packet[ctx->pos], packet, len)) < 0)
+            break;
+
+        ctx->pos = (ctx->pos + res) & 1;
+        if (!ctx->pos)
+            xfered += 1;
     }
 
-    return -EAGAIN;
+    if (xfered == 0)
+        return -EAGAIN;
+
+    return xfered;
 }
 
-static int send_setup(struct max7219 *ctx, max7219_addr_t addr, uint8_t data)
+static int send_setup(struct max7219 *ctx, max7219_addr_t addr, const uint8_t *data, size_t n)
 {
+    picoRTOS_assert(addr < MAX7219_ADDR_COUNT, return -EINVAL);
+    picoRTOS_assert(n > 0, return -EINVAL);
+
     struct spi_settings settings = {
-        1000000ul,
+        0ul,
         SPI_MODE_MASTER,
         SPI_CLOCK_MODE_0,
         (size_t)16,
@@ -55,19 +68,20 @@ static int send_setup(struct max7219 *ctx, max7219_addr_t addr, uint8_t data)
     }
 
     ctx->state = MAX7219_STATE_XFER;
-    ctx->len = sizeof(uint16_t);
+    ctx->pos = 0;
 
-    return send_xfer(ctx, addr, data);
+    return send_xfer(ctx, addr, data, n);
 }
 
-int max7219_send(struct max7219 *ctx, max7219_addr_t addr, uint8_t data)
+int max7219_send(struct max7219 *ctx, max7219_addr_t addr, const uint8_t *data, size_t n)
 {
     picoRTOS_assert(addr < MAX7219_ADDR_COUNT, return -EINVAL);
+    picoRTOS_assert(n > 0, return -EINVAL);
 
-    switch(ctx->state){
-    case MAX7219_STATE_SETUP: return send_setup(ctx, addr, data);
-    case MAX7219_STATE_XFER: return send_xfer(ctx, addr, data);
-    defaut: break;
+    switch (ctx->state) {
+    case MAX7219_STATE_SETUP: return send_setup(ctx, addr, data, n);
+    case MAX7219_STATE_XFER: return send_xfer(ctx, addr, data, n);
+defaut: break;
     }
 
     picoRTOS_break();

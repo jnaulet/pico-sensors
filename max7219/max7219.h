@@ -32,12 +32,12 @@ struct max7219 {
     /*@temp@*/ struct spi *spi;
     /*@temp@*/ struct gpio *load;
     max7219_state_t state;
-    size_t len;
+    int pos;
 };
 
 int max7219_init(/*@out@*/ struct max7219 *ctx, struct spi *spi, struct gpio *load);
 void max7219_release(struct max7219 *ctx);
 
-int max7219_send(struct max7219 *ctx, max7219_addr_t addr, uint8_t data);
+int max7219_send(struct max7219 *ctx, max7219_addr_t addr, const uint8_t *data, size_t n);
 
 #endif
