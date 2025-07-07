@@ -1,0 +1,21 @@
+target := lgt8f328p-display.elf
+hex    := $(target:%.elf=%.hex)
+
+c_src-$(CONFIG_MACH_LGT8FX8P) += lgt8f328p.c
+
+include Makefile.in
+
+ifneq ($(skip-makefile),1)
+
+config: FORCE
+	$(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD) lgt8f328p_defconfig
+	@ln -sfT Makefile.lgt8f328p Kbuild
+
+$(hex): $(target)
+	avr-objcopy -O ihex -R .eeprom $< $@
+
+avrdude: $(hex)
+	avrdude -v -pm328p -b57600 -carduino -P/dev/ttyUSB0 \
+          -D -Uflash:w:$<:i
+
+endif

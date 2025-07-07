@@ -1,0 +1,22 @@
+target := n76e003-display.ihx
+
+c_src-$(CONFIG_MACH_N76E003) += n76e003.c
+
+include Makefile.in
+
+ifneq ($(skip-makefile),1)
+
+NUVOPROG := ~/go/bin/nuvoprog
+NUVOPROGC := nuvoprog-c
+
+config: FORCE
+	$(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD) n76e003_defconfig
+	@ln -sfT Makefile.n76e003 Kbuild
+
+nuvoprogc: $(target)
+	$(NUVOPROGC) --program $< -v
+
+nuvoprog: $(target)
+	$(NUVOPROG) program -i $< -t n76e003 -c @config.json -v
+
+endif
