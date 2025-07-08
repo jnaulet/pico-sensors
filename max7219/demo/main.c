@@ -183,7 +183,7 @@ begin:
 
         fb_render(&fb);
         max7219_refresh(&max7219, &fb);
-        picoRTOS_sleep_until(&ref, PICORTOS_DELAY_MSEC(100));
+        picoRTOS_sleep_until(&ref, PICORTOS_DELAY_MSEC(100ul));
     }
 
     /* vertical */
@@ -204,7 +204,7 @@ begin:
 
         fb_render(&fb);
         max7219_refresh(&max7219, &fb);
-        picoRTOS_sleep_until(&ref, PICORTOS_DELAY_MSEC(100));
+        picoRTOS_sleep_until(&ref, PICORTOS_DELAY_MSEC(100ul));
     }
 
     /* blink */
@@ -223,7 +223,7 @@ begin:
     for (int i = 10; i-- != 0;) {
         fb_invert(&fb);
         max7219_refresh(&max7219, &fb);
-        picoRTOS_sleep_until(&ref, PICORTOS_DELAY_MSEC(100));
+        picoRTOS_sleep_until(&ref, PICORTOS_DELAY_MSEC(100ul));
     }
 
     /* The End */
