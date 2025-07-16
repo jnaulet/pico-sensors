@@ -28,7 +28,7 @@ void aht10_release(struct aht10 *ctx)
 
 static int aht10_read_measure_resp(struct aht10 *ctx, struct aht10_measurement *m)
 {
-    static char buf[AHT10_MEASURE_RESP_LEN];
+    static unsigned char buf[AHT10_MEASURE_RESP_LEN];
 
     int res;
     size_t index = sizeof(buf) - ctx->len;
