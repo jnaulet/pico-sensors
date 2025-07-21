@@ -37,7 +37,7 @@ void ht16k33_release(struct ht16k33 *ctx);
 #define DISPLAY_DATA_M  0xfu
 #define DISPLAY_DATA(x) ((x) & DISPLAY_DATA_M)
 
-#define SYSTEM_SETUP_S  (1 << 0)
+#define S  (1 << 0)
 
 #define DISPLAY_SETUP_D    (1 << 2)
 #define DISPLAY_SETUP_B_M  0x3u
