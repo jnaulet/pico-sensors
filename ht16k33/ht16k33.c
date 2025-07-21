@@ -1,0 +1,119 @@
+#include "ht16k33.h"
+#include <errno.h>
+
+int ht16k33_init(struct ht16k33 *ctx, struct twi *i2c, twi_addr_t addr)
+{
+    picoRTOS_assert(addr >= HT16K33_BASEADDR, return -EINVAL);
+    picoRTOS_assert(addr < (HT16K33_BASEADDR + HT16K33_BASEADDR_COUNT), return -EINVAL);
+
+    ctx->i2c = i2c;
+    ctx->addr = addr;
+
+    ctx->state = AHT10_STATE_SETUP;
+    ctx->len = 0;
+    ctx->tick = 0;
+
+    return 0;
+}
+
+void ht16k33_release(struct ht16k33 *ctx)
+{
+    /*@i@*/ (void)ctx;
+}
+
+static int ht16k33_setup(struct ht16k33 *ctx)
+{
+    int res;
+    struct twi_settings i2c_settings = {
+        TWI_BITRATE_STANDARD,
+        TWI_MODE_MASTER,
+        ctx->addr
+    };
+
+    if ((res = twi_setup(ctx->i2c, &i2c_settings)) < 0)
+        return res;
+
+    ctx->state = HT16K33_STATE_DATA;
+    ctx->len = n;
+
+    return -EAGAIN;
+}
+
+static int ht16k33_write_data(struct ht16k33 *ctx, const void *buf, size_t n)
+{
+    picoRTOS_assert(n > 0, return -EINVAL);
+
+    int res;
+
+    if ((res = twi_write(ctx->twi, buf, n, TWI_F_STOP)) == (int)n)
+        ctx->state = HT16K33_STATE_SETUP;
+
+    return res;
+}
+
+static int ht16k33_write_cc(struct ht16k33 *ctx, uint8_t cc, /*@null@*/ const void *buf, size_t n)
+{
+    int res = -EAGAIN;
+
+    if (buf != NULL) {
+        if ((res = twi_write(ctx->twi, &cc, sizeof(cc), TWI_F_START)) >= 0) {
+            ctx->state = HT16K33_STATE_DATA;
+            return ht16k33_write_data(ctx, buf, n);
+        }
+
+    } else {
+        if ((res = twi_write(ctx->twi, &cc, sizeof(cc), TWI_F_START | TWI_F_STOP)) >= 0)
+            ctx->state = HT16K33_STATE_SETUP;
+
+        return res;
+    }
+}
+
+int ht16k33_write(struct ht16k33 *ctx, uint8_t cc, const void *buf, size_t n)
+{
+    switch (ctx->state) {
+    case HT16K33_STATE_SETUP: return ht16k33_setup(ctx);
+    case HT16K33_STATE_CC: return ht16k33_write_cc(ctx, cc, buf, n);
+    case HT16K33_STATE_DATA: return ht16k33_write_data(ctx, buf, n);
+    default: break;
+    }
+
+    picoRTOS_break();
+    /*@notreached@*/ return -EIO;
+}
+
+static int ht16k33_read_data(struct ht16k33 *ctx, size_t n)
+{
+    picoRTOS_assert(n > 0, return -EINVAL);
+
+    int res;
+
+    if ((res = twi_write(ctx->read, buf, n, TWI_F_START | TWI_F_STOP)) == (int)n)
+        ctx->state = HT16K33_STATE_SETUP;
+
+    return res;
+}
+
+static int ht16k33_read_cc(struct ht16k33 *ctx, uint8_t cc, void *buf, size_t n)
+{
+    int res;
+
+    if ((res = twi_write(ctx->twi, &cc, sizeof(cc), TWI_F_START | TWI_F_STOP)) < 0)
+        return res;
+
+    ctx->state = HT16K33_STATE_DATA;
+    return ht16k33_read_data(ctx, buf, n);
+}
+
+int ht16k33_read(struct ht16k33 *ctx, uint8_t cc, void *buf, size_t n)
+{
+    switch (ctx->state) {
+    case HT16K33_STATE_SETUP: return ht16k33_setup(ctx);
+    case HT16K33_STATE_CC: return ht16k33_read_cc(ctx, cc, buf, n);
+    case HT16K33_STATE_DATA: return ht16k33_read_data(ctx, buf, n);
+    default: break;
+    }
+
+    picoRTOS_break();
+    /*@notreached@*/ return -EIO;
+}
