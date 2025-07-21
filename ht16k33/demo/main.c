@@ -53,7 +53,8 @@ static void display_main(void *priv)
     static struct ht16k33 ht16k33;
     (void) ht16k33_init(&ht16k33, ctx->I2C, HT16K33_BASEADDR);
 
-    static uint8_t zero = { 0, 0, 0, 0, 0, 0, 0, 0 };
+    static uint8_t zero[] = { 0, 0, 0, 0, 0, 0, 0, 0,
+                              0, 0, 0, 0, 0, 0, 0, 0 };
 
     /* init display */
     (void) ht16k33_write_wait(&ht16k33, (uint8_t)HT16K33_CC_DISPLAY_DATA, zero, sizeof(zero));
