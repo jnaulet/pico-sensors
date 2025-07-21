@@ -1,0 +1,10 @@
+#
+# picoRTOS sensors library
+#
+# How tu use:
+# -include /path/to/pico-sensors/sensor/Makefile.in
+#
+ht16k33-path := $(dir $(lastword $(MAKEFILE_LIST)))
+
+c_src-y   += $(ht16k33-path)ht16k33.c
+include-y += -I$(ht16k33-path)
