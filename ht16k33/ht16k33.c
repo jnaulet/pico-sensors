@@ -56,8 +56,8 @@ static int ht16k33_write_cc(struct ht16k33 *ctx, uint8_t cc, /*@null@*/ const vo
     int res = -EAGAIN;
 
     if (buf != NULL) {
-        /* +1 to ensure no repeated start is emitted */
-        if ((res = twi_write(ctx->twi, &cc, sizeof(cc) + 1, TWI_F_S)) >= 0) {
+        /* +n to ensure no repeated start is emitted */
+        if ((res = twi_write(ctx->twi, &cc, sizeof(cc) + n, TWI_F_S | TWI_F_N(1))) == 1) {
             ctx->state = HT16K33_STATE_DATA;
             return ht16k33_write_data(ctx, buf, n);
         }
@@ -90,7 +90,7 @@ static int ht16k33_read_data(struct ht16k33 *ctx, void *buf, size_t n)
     int res;
 
     /* repeated start + read */
-    if ((res = twi_write(ctx->read, buf, n, TWI_F_S | TWI_F_P)) == (int)n)
+    if ((res = twi_read(ctx->twi, buf, n, TWI_F_S | TWI_F_P)) == (int)n)
         ctx->state = HT16K33_STATE_SETUP;
 
     return res;
