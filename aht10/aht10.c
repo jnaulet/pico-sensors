@@ -33,7 +33,7 @@ static int aht10_read_measure_resp(struct aht10 *ctx, struct aht10_measurement *
     int res;
     size_t index = sizeof(buf) - ctx->len;
 
-    if ((res = twi_read(ctx->i2c, &buf[index], ctx->len, TWI_F_START | TWI_F_STOP)) < 0)
+    if ((res = twi_read(ctx->i2c, &buf[index], ctx->len, TWI_F_S | TWI_F_P)) < 0)
         return res;
 
     if ((ctx->len -= (size_t)res) == 0) {
@@ -59,7 +59,7 @@ static int aht10_calibration(struct aht10 *ctx)
     size_t index = (sizeof(AHT10_INIT_REQ) - 1) - ctx->len;
     static const char req[] = { AHT10_INIT_REQ };
 
-    if ((res = twi_write(ctx->i2c, &req[index], ctx->len, TWI_F_START | TWI_F_STOP)) < 0)
+    if ((res = twi_write(ctx->i2c, &req[index], ctx->len, TWI_F_S | TWI_F_P)) < 0)
         return res;
 
     if ((ctx->len -= (size_t)res) == 0) {
@@ -75,7 +75,7 @@ static int aht10_read_measure_status(struct aht10 *ctx, struct aht10_measurement
     int res;
     char status = (char)0;
 
-    if ((res = twi_read(ctx->i2c, &status, sizeof(status), TWI_F_START | TWI_F_STOP)) < 0)
+    if ((res = twi_read(ctx->i2c, &status, sizeof(status), TWI_F_S)) < 0)
         return res;
 
     if (((int)status & AHT10_STATUS_CAL) == 0) {
@@ -115,7 +115,7 @@ static int aht10_read_measure_req(struct aht10 *ctx, struct aht10_measurement *m
     size_t index = (sizeof(AHT10_MEASURE_REQ) - 1) - ctx->len;
     static const char req[] = { AHT10_MEASURE_REQ };
 
-    if ((res = twi_write(ctx->i2c, &req[index], ctx->len, TWI_F_START | TWI_F_STOP)) < 0)
+    if ((res = twi_write(ctx->i2c, &req[index], ctx->len, TWI_F_S | TWI_F_P)) < 0)
         return res;
 
     if ((ctx->len -= (size_t)res) == 0) {
