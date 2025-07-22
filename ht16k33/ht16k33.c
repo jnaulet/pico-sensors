@@ -45,7 +45,7 @@ static int ht16k33_write_data(struct ht16k33 *ctx, const void *buf, size_t n)
 
     int res;
 
-    if ((res = twi_write(ctx->twi, buf, n, TWI_F_STOP)) == (int)n)
+    if ((res = twi_write(ctx->twi, buf, n, TWI_F_P)) == (int)n)
         ctx->state = HT16K33_STATE_SETUP;
 
     return res;
@@ -56,13 +56,14 @@ static int ht16k33_write_cc(struct ht16k33 *ctx, uint8_t cc, /*@null@*/ const vo
     int res = -EAGAIN;
 
     if (buf != NULL) {
-        if ((res = twi_write(ctx->twi, &cc, sizeof(cc), TWI_F_START)) >= 0) {
+        /* +1 to ensure no repeated start is emitted */
+        if ((res = twi_write(ctx->twi, &cc, sizeof(cc) + 1, TWI_F_S)) >= 0) {
             ctx->state = HT16K33_STATE_DATA;
             return ht16k33_write_data(ctx, buf, n);
         }
 
     } else {
-        if ((res = twi_write(ctx->twi, &cc, sizeof(cc), TWI_F_START | TWI_F_STOP)) >= 0)
+        if ((res = twi_write(ctx->twi, &cc, sizeof(cc), TWI_F_S | TWI_F_P)) >= 0)
             ctx->state = HT16K33_STATE_SETUP;
 
         return res;
@@ -82,13 +83,14 @@ int ht16k33_write(struct ht16k33 *ctx, uint8_t cc, const void *buf, size_t n)
     /*@notreached@*/ return -EIO;
 }
 
-static int ht16k33_read_data(struct ht16k33 *ctx, size_t n)
+static int ht16k33_read_data(struct ht16k33 *ctx, void *buf, size_t n)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
 
     int res;
 
-    if ((res = twi_write(ctx->read, buf, n, TWI_F_START | TWI_F_STOP)) == (int)n)
+    /* repeated start + read */
+    if ((res = twi_write(ctx->read, buf, n, TWI_F_S | TWI_F_P)) == (int)n)
         ctx->state = HT16K33_STATE_SETUP;
 
     return res;
@@ -96,9 +98,11 @@ static int ht16k33_read_data(struct ht16k33 *ctx, size_t n)
 
 static int ht16k33_read_cc(struct ht16k33 *ctx, uint8_t cc, void *buf, size_t n)
 {
+    picoRTOS_assert(n > 0, return -EINVAL);
+
     int res;
 
-    if ((res = twi_write(ctx->twi, &cc, sizeof(cc), TWI_F_START | TWI_F_STOP)) < 0)
+    if ((res = twi_write(ctx->twi, &cc, sizeof(cc), TWI_F_S)) < 0)
         return res;
 
     ctx->state = HT16K33_STATE_DATA;
