@@ -35,23 +35,24 @@ static void mux_init(void)
 
 static int gpio_init(/*@partial@*/ struct board *ctx)
 {
-  static struct gpio L;
-  (void)gpio_n76e003_init(&L, (size_t)1, (size_t)5);
+    static struct gpio L;
 
-  ctx->L = &L;
-  return 0;
+    (void)gpio_n76e003_init(&L, (size_t)1, (size_t)5);
+
+    ctx->L = &L;
+    return 0;
 }
 
-static int w1_init(/*@partial@*/ struct n76e003 *ctx)
+static int w1_init(/*@partial@*/ struct board *ctx)
 {
-  static struct uart UART0;
-  static struct w1 W1;
+    static struct uart UART0;
+    static struct w1 W1;
 
-  (void)uart_n76e003_init(&UART0, UART_N76E003_UART0_T1);
-  (void)w1_uart_init(&W1, &UART0);
+    (void)uart_n76e003_init(&UART0, UART_N76E003_UART0_T1);
+    (void)w1_uart_init(&W1, &UART0);
 
-  ctx->W1 = &W1;
-  return 0;
+    ctx->W1 = &W1;
+    return 0;
 }
 
 int board_init(struct board *ctx)

@@ -4,8 +4,6 @@
 #include "board.h"
 #include "ds18b20.h"
 
-static bool needs_misting = false;
-
 static void led_main(void *priv)
 {
     picoRTOS_assert_fatal(priv != NULL, return );
@@ -35,22 +33,22 @@ static void sensor_main(void *priv)
     struct w1 *W1 = (struct w1*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
 
-    (void) ds18b20(&ds18b20, W1);
-    
+    (void)ds18b20_init(&ds18b20, W1);
+
     for (;;) {
 
-      /* prepare new transaction */
-      while(w1_reset(W1) < 0) picoRTOS_postpone();
-      
-      /* skip ROM */
-      while(ds18b20_write(&ds18b20, DS18B20_ROM_SKIP, NULL, 0) < 0)
-        picoRTOS_postpone();
+        /* prepare new transaction */
+        while (w1_reset(W1) < 0) picoRTOS_postpone();
 
-      /* start measurement */
-      while(ds18b20_read(&ds18b20, DS18B20_FN_CONVERT_T, NULL, 0) < 0)
-        picoRTOS_postpone();
-      
-      picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
+        /* skip ROM */
+        while (ds18b20_write(&ds18b20, DS18B20_ROM_SKIP, NULL, 0) < 0)
+            picoRTOS_postpone();
+
+        /* start measurement */
+        while (ds18b20_read(&ds18b20, DS18B20_FN_CONVERT_T, NULL, 0) < 0)
+            picoRTOS_postpone();
+
+        picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
     }
 }
 
@@ -63,7 +61,7 @@ int main(void)
     static picoRTOS_stack_t stack1[CONFIG_DEFAULT_STACK_COUNT * 2];
 
     picoRTOS_init();
-    (void)board_init(&board;
+    (void)board_init(&board);
 
     /* led */
     picoRTOS_task_init(&task, led_main, board.L, stack0, PICORTOS_STACK_COUNT(stack0));
