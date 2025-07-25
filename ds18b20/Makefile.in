@@ -1,0 +1,10 @@
+#
+# picoRTOS sensors library
+#
+# How tu use:
+# -include /path/to/pico-sensors/sensor/Makefile.in
+#
+ds18b20-path := $(dir $(lastword $(MAKEFILE_LIST)))
+
+c_src-y   += $(ds18b20-path)ds18b20.c
+include-y += -I$(ds18b20-path)
