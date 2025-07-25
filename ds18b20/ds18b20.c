@@ -22,8 +22,8 @@ int ds18b20_write(struct ds18b20 *ctx, int cmd, /*@null@*/ const void *buf, size
         if ((res = w1_write(ctx->w1, &c, sizeof(c))) < 0)
             return res;
 
-        if (buf != NULL && n > 0)
-            ctx->state = DS18B20_STATE_DATA;
+        if (buf != NULL && n > 0) ctx->state = DS18B20_STATE_DATA;
+        else return 0;
     }
 
     if (ctx->state == DS18B20_STATE_DATA) {
@@ -41,7 +41,7 @@ int ds18b20_write(struct ds18b20 *ctx, int cmd, /*@null@*/ const void *buf, size
     /*@notreached@*/ return -EIO;
 }
 
-int ds18b20_read(struct ds18b20 *ctx, int cmd, /*@null@*/ const void *buf, size_t n)
+int ds18b20_read(struct ds18b20 *ctx, int cmd, /*@null@*/ void *buf, size_t n)
 {
     int res;
 
@@ -50,8 +50,8 @@ int ds18b20_read(struct ds18b20 *ctx, int cmd, /*@null@*/ const void *buf, size_
         if ((res = w1_write(ctx->w1, &c, sizeof(c))) < 0)
             return res;
 
-        if (buf != NULL && n > 0)
-            ctx->state = DS18B20_STATE_DATA;
+        if (buf != NULL && n > 0) ctx->state = DS18B20_STATE_DATA;
+        else return 0;
     }
 
     if (ctx->state == DS18B20_STATE_DATA) {
