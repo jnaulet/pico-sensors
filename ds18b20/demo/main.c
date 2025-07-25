@@ -38,14 +38,16 @@ static void sensor_main(void *priv)
     for (;;) {
 
         /* prepare new transaction */
-        while (w1_reset(W1) < 0) picoRTOS_postpone();
+        while (w1_reset(W1) < 0)
+            picoRTOS_postpone();
 
         /* skip ROM */
         while (ds18b20_write(&ds18b20, DS18B20_ROM_SKIP, NULL, 0) < 0)
             picoRTOS_postpone();
 
+        uint8_t c;
         /* start measurement */
-        while (ds18b20_read(&ds18b20, DS18B20_FN_CONVERT_T, NULL, 0) < 0)
+        while (ds18b20_read(&ds18b20, DS18B20_FN_CONVERT_T, &c, sizeof(c)) < 0)
             picoRTOS_postpone();
 
         picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
