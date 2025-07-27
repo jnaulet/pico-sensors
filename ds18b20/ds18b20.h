@@ -41,4 +41,6 @@ void ds18b20_release(struct ds18b20 *ctx);
 int ds18b20_write(struct ds18b20 *ctx, int cmd, /*@null@*/ const void *buf, size_t n);
 int ds18b20_read(struct ds18b20 *ctx, int cmd, /*@null@*/ void *buf, size_t n);
 
+int ds18b20_poll(struct ds18b20 *ctx);
+
 #endif

@@ -67,3 +67,14 @@ int ds18b20_read(struct ds18b20 *ctx, int cmd, /*@null@*/ void *buf, size_t n)
     picoRTOS_break();
     /*@notreached@*/ return -EIO;
 }
+
+int ds18b20_poll(struct ds18b20 *ctx)
+{
+  int res;
+  uint8_t c = 0;
+  
+  if ((res = w1_read(ctx->w1, &c, sizeof(c))) < 0)
+    return res;
+
+  return (int)c;
+}
