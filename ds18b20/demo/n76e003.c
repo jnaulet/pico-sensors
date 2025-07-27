@@ -29,7 +29,7 @@ static void mux_init(void)
     (void)mux_n76e003_init(&P1, (size_t)1);
 
     (void)mux_n76e003_mode(&P0, (size_t)6, MUX_N76E003_MODE_QUASIBDIR); /* TXD */
-    (void)mux_n76e003_mode(&P0, (size_t)7, MUX_N76E003_MODE_QUASIBDIR); /* RXD */
+    (void)mux_n76e003_mode(&P0, (size_t)7, MUX_N76E003_MODE_OPENDRAIN); /* RXD */
     (void)mux_n76e003_mode(&P1, (size_t)5, MUX_N76E003_MODE_QUASIBDIR); /* L */
 }
 
