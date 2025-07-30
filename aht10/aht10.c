@@ -53,6 +53,7 @@ static int aht10_read_measure_resp(struct aht10 *ctx, struct aht10_measurement *
     return -EAGAIN;
 }
 
+#ifndef AHT10_CONFIG_NO_CALIBRATION
 static int aht10_calibration(struct aht10 *ctx)
 {
     int res;
@@ -69,6 +70,7 @@ static int aht10_calibration(struct aht10 *ctx)
 
     return -EAGAIN;
 }
+#endif
 
 static int aht10_read_measure_status(struct aht10 *ctx, struct aht10_measurement *m)
 {
@@ -79,10 +81,15 @@ static int aht10_read_measure_status(struct aht10 *ctx, struct aht10_measurement
         return res;
 
     if (((int)status & AHT10_STATUS_CAL) == 0) {
+#ifndef AHT10_CONFIG_NO_CALIBRATION
         /* calibration */
         ctx->len = sizeof(AHT10_INIT_REQ) - 1;
         ctx->state = AHT10_STATE_CALIBRATION;
         return aht10_calibration(ctx);
+#else
+        picoRTOS_break();
+        /*@notreached@*/ return -EFAULT;
+#endif
     }
 
     if (((int)status & AHT10_STATUS_BUSY) == 0) {
@@ -155,7 +162,9 @@ int aht10_read(struct aht10 *ctx, struct aht10_measurement *m)
     case AHT10_STATE_MEASURE_REQ: return aht10_read_measure_req(ctx, m);
     case AHT10_STATE_MEASURE_WAIT: return aht10_read_measure_wait(ctx, m);
     case AHT10_STATE_MEASURE_STATUS: return aht10_read_measure_status(ctx, m);
+#ifndef AHT10_CONFIG_NO_CALIBRATION
     case AHT10_STATE_CALIBRATION: return aht10_calibration(ctx);
+#endif
     case AHT10_STATE_MEASURE_RESP: return aht10_read_measure_resp(ctx, m);
     default: break;
     }
