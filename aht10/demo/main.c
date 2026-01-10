@@ -42,7 +42,7 @@ static void sensors_dbg(struct uart *DBG, int t, int rh)
     dbg[7] = hex[rh % 10];
     /* %\n */
 
-    while (sent != sizeof(dbg) - 1) {
+    while (sent != (int) sizeof(dbg) - 1) {
         int n = uart_write(DBG, &dbg[sent], sizeof(dbg) - sent);
         if (n < 0) picoRTOS_postpone();
         else sent += n;

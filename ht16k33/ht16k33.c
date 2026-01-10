@@ -73,7 +73,7 @@ int ht16k33_write(struct ht16k33 *ctx, int cc, const void *buf, size_t n)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -112,6 +112,6 @@ int ht16k33_read(struct ht16k33 *ctx, int cc, void *buf, size_t n)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }

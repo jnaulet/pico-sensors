@@ -56,7 +56,6 @@ static int send_setup(struct max7219 *ctx, max7219_addr_t addr, const uint8_t *d
     picoRTOS_assert(addr < MAX7219_ADDR_COUNT, return -EINVAL);
     picoRTOS_assert(n > 0, return -EINVAL);
 
-    int res;
     struct spi_settings settings = {
         0ul,
         SPI_MODE_MASTER,
@@ -66,7 +65,8 @@ static int send_setup(struct max7219 *ctx, max7219_addr_t addr, const uint8_t *d
         (size_t)0
     };
 
-    if ((res = spi_setup(ctx->spi, &settings)) < 0) {
+    if ((spi_setup(ctx->spi, &settings)) < 0) {
+        int res;
         /* attempt a 8bit only */
         settings.frame_size = (size_t)8;
         if ((res = spi_setup(ctx->spi, &settings)) < 0)
@@ -91,6 +91,6 @@ int max7219_send(struct max7219 *ctx, max7219_addr_t addr, const uint8_t *data, 
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }

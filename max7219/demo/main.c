@@ -79,7 +79,9 @@ static void fb_set(struct fb *fb, uint8_t val)
 
 static void fb_invert(struct fb *fb)
 {
-    for (uint_fast8_t n = (uint_fast8_t)sizeof(fb->buf); n-- != 0;)
+    uint_fast8_t n;
+
+    for (n = (uint_fast8_t)sizeof(fb->buf); n-- != 0;)
         fb->buf[n] = ~fb->buf[n];
 }
 
@@ -94,7 +96,9 @@ static void fb_invert(struct fb *fb)
 
 static void fb_render(struct fb *fb)
 {
-    for (uint_fast8_t i = (uint_fast8_t)sizeof(fb->buf); i-- != 0;) {
+    uint_fast8_t i;
+
+    for (i = (uint_fast8_t)sizeof(fb->buf); i-- != 0;) {
         /* TODO: check what's faster */
         uint_fast8_t x = i & (uint_fast8_t)0x3u;
         uint_fast8_t y = i >> 2;
@@ -103,7 +107,8 @@ static void fb_render(struct fb *fb)
         fb->buf[i] = 0;
 
         /* sprite render */
-        for (uint_fast8_t j = (uint_fast8_t)SPRITE_COUNT; j-- != 0;) {
+        uint_fast8_t j;
+        for (j = (uint_fast8_t)SPRITE_COUNT; j-- != 0;) {
             /* condition(s) */
             uint_fast8_t l = y - fb->sprite[j].y;
 
@@ -176,9 +181,10 @@ begin:
     SPRITE_SET(&fb.sprite[7], (32 + 29), 1, HEARTL);
     SPRITE_SET(&fb.sprite[8], (32 + 33), 1, HEARTR);
 
-    while (fb.sprite[8].x != (uint_fast8_t)-4) {
+    while ((int_fast8_t)fb.sprite[8].x != (int_fast8_t)-4) {
         /* scroll */
-        for (uint_fast8_t n = (uint_fast8_t)SPRITE_COUNT; n-- != 0;)
+        uint_fast8_t n;
+        for (n = (uint_fast8_t)SPRITE_COUNT; n-- != 0;)
             fb.sprite[n].x--;
 
         fb_render(&fb);
@@ -199,7 +205,8 @@ begin:
 
     while (fb.sprite[8].y != (uint_fast8_t)12) {
         /* scroll */
-        for (uint_fast8_t n = (uint_fast8_t)SPRITE_COUNT; n-- != 0;)
+        uint_fast8_t n;
+        for (n = (uint_fast8_t)SPRITE_COUNT; n-- != 0;)
             fb.sprite[n].y++;
 
         fb_render(&fb);
@@ -220,7 +227,8 @@ begin:
 
     fb_render(&fb);
 
-    for (int i = 10; i-- != 0;) {
+    int i;
+    for (i = 10; i-- != 0;) {
         fb_invert(&fb);
         max7219_refresh(&max7219, &fb);
         picoRTOS_sleep_until(&ref, PICORTOS_DELAY_MSEC(100ul));

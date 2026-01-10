@@ -87,7 +87,7 @@ static int aht10_read_measure_status(struct aht10 *ctx, struct aht10_measurement
         ctx->state = AHT10_STATE_CALIBRATION;
         return aht10_calibration(ctx);
 #else
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EFAULT;
 #endif
     }
@@ -169,6 +169,6 @@ int aht10_read(struct aht10 *ctx, struct aht10_measurement *m)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
