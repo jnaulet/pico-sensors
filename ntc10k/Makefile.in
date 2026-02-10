@@ -1,0 +1,10 @@
+#
+# picoRTOS sensors library
+#
+# How tu use:
+# -include /path/to/pico-sensors/sensor/Makefile.in
+#
+ntc10k-path := $(dir $(lastword $(MAKEFILE_LIST)))
+
+c_src-y   += $(ntc10k-path)ntc10k.c
+include-y += -I$(ntc10k-path)
