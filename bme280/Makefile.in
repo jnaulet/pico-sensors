@@ -1,0 +1,10 @@
+#
+# picoRTOS sensors library
+#
+# How tu use:
+# -include /path/to/pico-sensors/sensor/Makefile.in
+#
+bme280-path := $(dir $(lastword $(MAKEFILE_LIST)))
+
+c_src-y   += $(bme280-path)bme280.c
+include-y += -I$(bme280-path)
