@@ -68,7 +68,7 @@ static int send_setup(struct max7219 *ctx, max7219_addr_t addr, const uint8_t *d
     if ((spi_setup(ctx->spi, &settings)) < 0) {
         int res;
         /* attempt a 8bit only */
-        settings.frame_size = (size_t)8;
+        settings.frame_nbits = (size_t)8;
         if ((res = spi_setup(ctx->spi, &settings)) < 0)
             return res;
     }
