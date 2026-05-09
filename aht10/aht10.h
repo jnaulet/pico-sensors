@@ -8,6 +8,9 @@
 
 typedef enum {
     AHT10_STATE_SETUP,
+    AHT10_STATE_SLEEP,
+    AHT10_STATE_SOFTRESET,
+    AHT10_STATE_SOFTRESET_WAIT,
     AHT10_STATE_MEASURE_REQ,
     AHT10_STATE_MEASURE_WAIT,
     AHT10_STATE_MEASURE_STATUS,
@@ -23,8 +26,11 @@ struct aht10 {
     twi_addr_t addr;
     /* state machine */
     aht10_state_t state;
-    size_t len;
     picoRTOS_tick_t tick;
+    struct {
+        int n;
+        size_t total;
+    } xfer;
 };
 
 int aht10_init(/*@out@*/ struct aht10 *ctx, struct twi *i2c, twi_addr_t addr);
